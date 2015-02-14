@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE configuration 
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-config.dtd"> 
+  
+<configuration> 
+    <settings> 
+        <!-- changes from the defaults for testing --> 
+        <setting name="cacheEnabled" value="false" /> 
+        <setting name="useGeneratedKeys" value="true" /> 
+        <setting name="defaultExecutorType" value="REUSE" /> 
+    </settings> 
+    <typeAliases> 
+       <typeAlias alias="dao" type="com.newsmy.jdbc.Dao"/> 
+       <!-- <typeAlias alias="Student" type="com.newsmy."/>  -->
+    </typeAliases> 
+    <environments default="development"> 
+       <environment id="development"> 
+           <transactionManager type="jdbc"/> 
+           <dataSource type="POOLED">             
+    				<property name="jdbc.driverClassName" value="com.mysql.jdbc.Driver"/>  
+    				<property name="jdbc.url" value="jdbc:mysql://localhost:3306:newsmy"/>  
+    				<property name="username" value="root"/> 
+    				<property name="password" value="admin"/>
+           </dataSource> 
+       </environment> 
+    </environments> 
+    <mappers> 
+        <mapper resource="user.xml" /> 
+    </mappers> 
+</configuration> 

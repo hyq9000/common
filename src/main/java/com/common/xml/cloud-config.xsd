@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/cloud-config" xmlns:tns="http://www.example.org/cloud-config" elementFormDefault="qualified">
+	<element name="cloud">
+		<complexType>
+			<sequence>
+				<element name="plugins">
+					<complexType>
+						<sequence>
+							<element name="plugin" type="tns:tplugin" minOccurs="0" maxOccurs="unbounded"/>
+						</sequence>
+					</complexType>
+				</element>
+				<element name="email-config" type="tns:temail"></element>
+				<element name="cached" type="tns:tcached" minOccurs="0" maxOccurs="1"/>
+			</sequence>
+		</complexType>		
+	</element>
+
+	<complexType name="tcached">
+		<sequence>
+			<!-- 系统清理缓存的时间间隔，单位:秒 -->
+			<element name="clean-interval" type="int"/>
+			<!-- 被缓存内容在缓存中的超时秒数，单位:秒 -->
+			<element name="cached-timeout" type="int"/>
+			<!-- 允许缓存的实体类的完全限定名 -->
+			<element name="class" type="string" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<complexType name="tplugin">
+		<sequence>
+			<element name="describle" type="string" minOccurs="0" maxOccurs="1"></element>
+			<element name="name" type="string"></element>
+			<!-- 该插件内容是否访问受控,有则为不受控 -->
+			<element name="static" minOccurs="0" maxOccurs="1" nillable="true"></element>
+			<!-- 插件实现类名 -->
+			<element name="class" type="string" minOccurs="0" maxOccurs="1"></element>	
+			<!-- 后台管理主页url -->		
+			<element name="manage-url" type="string" minOccurs="0" maxOccurs="1"></element>
+			<!-- 前台主页url -->
+			<element name="index-url" type="string" minOccurs="0" maxOccurs="1"></element>
+			<!-- 菜单图标 -->
+			<element name="small-icon-url" type="string" minOccurs="0" maxOccurs="1"></element>
+			<!-- 子级菜单 -->
+			<element name="sub-menu" maxOccurs="unbounded" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="descripble" type="string" minOccurs="0" maxOccurs="1"></element>
+						<element name="name" type="string"></element>						
+						<!-- 该子级是否访问受控:有该元素则为不受控-->
+						<element name="static" minOccurs="0" maxOccurs="1" nillable="true"></element>
+			
+						<element name="manage-url" type="string" minOccurs="0" maxOccurs="1"></element>
+						<element name="index-url" type="string" minOccurs="0" maxOccurs="1"></element>
+						<element name="small-icon-url" type="string" minOccurs="0" maxOccurs="1"></element>
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+	<complexType name="temail">
+		<sequence>
+			<element name="server-dns" type="string"></element>
+			<element name="server-port" type="int"></element>
+			<element name="user-name" type="string"></element>
+			<element name="user-password" type="string"></element>
+			<!-- 发送邮件时的签名 -->
+			<element name="signature" type="string" ></element>
+			
+		</sequence>
+	</complexType>
+</schema>

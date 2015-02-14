@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper 
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+<mapper namespace="com.newsmy.jdbc.Dao"> 
+<!-- 这里namespace必须是dao接口的路径，不然要运行的时候要报错 “is not known to the MapperRegistry”--> 
+    <insert id="add" parameterType="T"> 
+       insert into  
+       <!-- 这里sql结尾不能加分号，否则报“ORA-00911”的错误 --> 
+    </insert> 
+ 
+    <!-- 这里的id必须和dao接口中的接口方法名相同，不然运行的时候也要报错 --> 
+    <select id="getById" parameterType="Serializable"> 
+        select * from $tablename$ where id=#{id} 
+    </select> 
+    
+    <delete id="delete" parameterType="T"> 
+         <!--  delete sql  --> 
+    </delete>
+    
+    <update id="update" parameterType="T"> 
+          <!-- update sql  --> 
+       </update> 
+    
+    <select id="getAll">
+    	<!-- select * from $tablename$ -->
+    </select>
+    
+    <select id="getByName" parameterType="String">
+    	<!-- select * from $tablename$ -->
+    </select>
+    
+    
+    
+    
+    
+    <select   id="execute1"   parameterType="string" resultType="int">   
+  		<![CDATA[   $sql$   ]]>     
+  	</select>
+  	
+  	<select   id="execute2"   parameterType="string" resultType="list">   
+  		<![CDATA[   $sql$   ]]>     
+  	</select>
+    
+</mapper>

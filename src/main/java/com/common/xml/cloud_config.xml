@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:cloud xmlns:tns="http://www.example.org/cloud-config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/cloud-config cloud-config.xsd ">
+  <tns:plugins>
+  	<tns:plugin>
+  		<tns:describle>售后服务模块</tns:describle>
+  		<tns:name>售后服务</tns:name>  		
+  		<tns:manage-url> </tns:manage-url>
+  		<tns:index-url> </tns:index-url>
+  		<tns:small-icon-url>/ccore/resources/images/ico_5.jpg</tns:small-icon-url>
+  		<tns:sub-menu>
+  			<tns:descripble>1</tns:descripble>
+  			<tns:name>在线售后</tns:name>
+  			<tns:manage-url> </tns:manage-url>
+  			<tns:index-url> </tns:index-url>
+  			<tns:small-icon-url>/ccore/resources/images/ico_5.jpg</tns:small-icon-url>
+  		</tns:sub-menu>
+  		<tns:sub-menu>
+  			<tns:descripble>1</tns:descripble>
+  			<tns:name>离岸售后</tns:name>
+  			<tns:manage-url> </tns:manage-url>
+  			<tns:index-url> </tns:index-url>
+  			<tns:small-icon-url>/ccore/resources/images/ico_5.jpg</tns:small-icon-url>
+  		</tns:sub-menu>
+ 	</tns:plugin>
+  	<tns:plugin>
+  		<tns:describle>售后服务模块</tns:describle>
+  		<tns:name>安卓新云</tns:name>  		
+  		<tns:static/>
+  		<tns:manage-url></tns:manage-url>
+  		<tns:index-url>http://220.168.57.230/nam_test2/index.html</tns:index-url>
+  		<tns:small-icon-url>/ccore/resources/images/ico_2.jpg</tns:small-icon-url>
+  	</tns:plugin>
+  	<tns:plugin>
+  		<tns:describle>售后服务模块</tns:describle>
+  		<tns:name>安卓新云</tns:name>  		
+  		<tns:manage-url></tns:manage-url>
+  		<tns:index-url>http://192.168.3.142/TBH/index.html</tns:index-url>
+  		<tns:small-icon-url>/ccore/resources/images/ico_2.jpg</tns:small-icon-url>
+  	</tns:plugin> 
+  	<tns:plugin>
+  		<tns:describle>售后服务模块</tns:describle>
+  		<tns:name>云出版</tns:name>  		
+  		<tns:manage-url> </tns:manage-url>
+  		<tns:index-url> </tns:index-url>
+  		<tns:small-icon-url>/ccore/resources/images/ico_7.jpg</tns:small-icon-url>
+  	</tns:plugin>
+  	<tns:plugin>
+  		<tns:describle>售后服务模块</tns:describle>
+  		<tns:name>在线商城</tns:name>  		
+  		<tns:manage-url> </tns:manage-url>
+  		<tns:index-url> </tns:index-url>
+  		<tns:small-icon-url>/ccore/resources/images/ico_6.jpg</tns:small-icon-url>
+  	</tns:plugin>
+  </tns:plugins>
+  <tns:email-config>
+  	<tns:server-dns>smtp.qq.com</tns:server-dns>
+  	<tns:server-port>25</tns:server-port>  	
+  	<tns:user-name>2372311627@qq.com</tns:user-name>
+  	<tns:user-password>sssstttt</tns:user-password>
+  	<tns:signature>湖南纽曼科技</tns:signature>
+  </tns:email-config>
+  <tns:cached>    
+    <tns:clean-interval>60</tns:clean-interval>
+    <tns:cached-timeout>300</tns:cached-timeout>
+    <tns:class>com.newsmy.ccore.entities.CcoreAccountInfo</tns:class>
+  </tns:cached>
+</tns:cloud>

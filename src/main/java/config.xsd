@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/cloud-config-ejb" xmlns:tns="http://www.example.org/cloud-config-ejb" elementFormDefault="qualified">
+	<element name="cloud">
+		<complexType>
+			<sequence>
+				<!-- EJB 数据连接单元名称  -->
+				<element name="persistence-unit-name" type="string" maxOccurs="1"  minOccurs="0"></element>
+				<element name="email-config" type="tns:temail"  minOccurs="0" maxOccurs="unbounded"></element>
+				<element name="cached" type="tns:tcached" minOccurs="0" maxOccurs="1"/>
+				<element name="permission" type="tns:permission" minOccurs="0" maxOccurs="1"></element>
+			</sequence>
+		</complexType>		
+	</element>
+	
+	<complexType name="tcached">
+		<sequence>
+			<!-- 系统清理缓存的时间间隔，单位:秒 -->
+			<element name="clean-interval" type="int"/>
+			<!-- 被缓存内容在缓存中的超时秒数，单位:秒 -->
+			<element name="cached-timeout" type="int"/>
+			<!-- 缓存更新的方式，目前只能为1或者0，为0表示需要更新缓存list里面的内容，为1表示需要删除缓存，重新从数据库查找 -->
+			<element name="cached-method" type="int"/>
+			<!-- 允许缓存的实体类的完全限定名 -->
+			<element name="class" type="string" minOccurs="0" maxOccurs="unbounded"/>
+			<!-- 不需要缓存的QueryLanguage(ql)-->
+			<element name="ql" type="string" minOccurs="0" maxOccurs="unbounded"/>
+			
+		</sequence>
+	</complexType>
+
+	<complexType name="temail">
+		<sequence>
+			<element name="server-dns" type="string"></element>
+			<element name="server-port" type="int"></element>
+			<element name="user-name" type="string"></element>
+			<element name="user-password" type="string"></element>
+			<!-- 发送邮件时的签名 -->
+			<element name="signature" type="string" ></element>			
+		</sequence>
+	</complexType>
+	
+	<!-- 与权限相关的一些配置 -->
+	<complexType name="permission">
+		<sequence>
+			<!-- 权限模块布署的服务器址 -->
+			<element name="host" type="string" default="127.0.0.1"></element>
+			<!-- 权限模块布署的服务端口 -->
+			<element name="port" type="int" default="1099"></element>
+			<!-- 权限模块中，几种特定角色类型的名称 ,这个目前比较死，后期需要优化-->
+			<element name="role-type">
+			<complexType>
+				<sequence>
+					<!-- 旅行社领导类型 -->
+					<element name="agency-manager" type="string"></element>
+					<!-- 落地资源企业类型 -->
+					<element name="resource-company" type="string"></element>
+					<!-- 导游类型 -->
+					<element name="guider" type="string"></element>
+					<!-- 旅行社类型 -->
+					<element name="agency" type="string"></element>
+				</sequence>
+			</complexType>			
+			</element>		
+		</sequence>
+	</complexType>
+</schema>

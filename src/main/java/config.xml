@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:cloud xmlns:tns="http://www.example.org/cloud-config-ejb" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/cloud-config-ejb config.xsd">
+  <tns:persistence-unit-name>db_con_pool</tns:persistence-unit-name>
+  <tns:email-config>
+  	<tns:server-dns>smtp.qq.com</tns:server-dns>
+  	<tns:server-port>25</tns:server-port>  	
+  	<tns:user-name>XXXX@qq.com</tns:user-name>
+  	<tns:user-password>sssstttt</tns:user-password>
+  	<tns:signature>点到信息科技发限有限公司</tns:signature>
+  </tns:email-config>
+  
+  <tns:cached>
+    <tns:clean-interval>600</tns:clean-interval>
+    <tns:cached-timeout>600</tns:cached-timeout>
+    <tns:cached-method>1</tns:cached-method>
+    <tns:class>com.ddao.ccore.entities.XXXX</tns:class>
+    <tns:class>com.ddao.ccore.entities.XXXXX</tns:class>
+    <tns:ql>From CcoreAccountInfo where accountLoginName=? AND accountPassword=?</tns:ql>
+  </tns:cached>
+  <tns:permission>
+  	<tns:host>127.0.0.1</tns:host>
+  	<tns:port>1099</tns:port>
+	 <tns:role-type>
+	 	<tns:agency-manager>旅行社领导</tns:agency-manager>
+	 	<tns:resource-company>落地资源企业</tns:resource-company>
+	 	<tns:guider>导游</tns:guider>
+	 	<tns:agency>旅行社</tns:agency>
+	 </tns:role-type>
+  </tns:permission>
+</tns:cloud>

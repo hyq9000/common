@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"	
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+			http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+			http://www.springframework.org/schema/tx 
+			http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	    	http://www.springframework.org/schema/aop 
+	    	http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">	
+	<!-- 配置系统业务操作日志写到数据库 及系统错误日志写到文件-->
+	<import resource="spring.hotel.xml"/>
+	<aop:aspectj-autoproxy proxy-target-class="true"/>
+	<!-- <bean id="operationLogService" class="org.springframework.jndi.JndiObjectFactoryBean" parent="jndiContext" lazy-init="default">
+		<property name="jndiName" value="OperationLogServiceJpaImpl/remote" />
+	</bean>	 -->	
+	<bean id="operationLogService" class="com.common.log.OperationLogServiceImpl">
+		<property name="sessionFactory" ref="sessionFactory" />  
+	</bean>
+	<bean id="logAdvice" class="com.common.log.LogAdvice">
+		<property name="service" ref="operationLogService"/>
+	</bean>
+	<bean id="log4jAdvice" class="com.common.log.ExceptionAdvice"/>
+	<!-- 系统业务操作日志 -->
+	<aop:config>
+		<aop:pointcut expression="@annotation(com.common.log.Log)" 
+			id="logPointcut"/>
+		<aop:advisor advice-ref="logAdvice" pointcut-ref="logPointcut"/>
+	</aop:config>	
+	<!-- 系统错误日志 暂时未发生作用-->
+	<aop:config>
+		<aop:pointcut expression="execution(* com.ddao..actions.*.*(..))" id="log4jPointcut"/>
+		<aop:advisor advice-ref="log4jAdvice" pointcut-ref="log4jPointcut"/>
+	</aop:config>
+</beans> 
