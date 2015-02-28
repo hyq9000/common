@@ -8,6 +8,7 @@
 	<description>专门用于数据库操作的通用接口及实现</description>
 	<dependencies>
 		<dependency>
+		
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
 			<version>2.4</version>
@@ -20,7 +21,7 @@
 			<artifactId>mybatis</artifactId>
 			<version>3.2.3</version>
 		</dependency>
-		<dependency>
+	 <dependency>
 			<groupId>com.google.zxing</groupId>
 			<artifactId>core</artifactId>
 			<version>3.2.0</version>
