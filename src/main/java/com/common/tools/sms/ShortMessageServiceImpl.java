@@ -17,12 +17,9 @@ import java.util.Date;
  */
 public class ShortMessageServiceImpl implements ShortMessageService {
 	/**
-	 * 发送短信到单个手机号
-	 * 
-	 * @param phoneNumber
-	 *            目标手机号
-	 * @param messageContent
-	 *            短信内容
+	 * 发送短信到单个手机号 
+	 * @param phoneNumber    目标手机号
+	 * @param messageContent   短信内容
 	 * @return 发送短信成功之后返回字符串"发送成功",否则则返回字符串"发送失败"
 	 */
 	public String sendMessage(String phoneNumber, String messageContent) {
@@ -30,12 +27,9 @@ public class ShortMessageServiceImpl implements ShortMessageService {
 	}
 
 	/**
-	 * 群发短信
-	 * 
-	 * @param phoneNumbers
-	 *            群发号码数组
-	 * @param messageContext
-	 *            群发内容
+	 * 群发短信 
+	 * @param phoneNumbers            群发号码数组
+	 * @param messageContext     群发内容
 	 * @return 群发短信成功之后返回字符串"发送成功",否则则返回字符串"发送失败"
 	 */
 	public String sendGroupMessage(String[] phoneNumbers, String messageContext) {

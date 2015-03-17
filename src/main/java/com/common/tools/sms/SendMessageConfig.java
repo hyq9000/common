@@ -1,4 +1,4 @@
-package 
+package com.common.tools.sms;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +10,7 @@ import java.util.Properties;
  * @author leihao
  *
  */
-public class SendMessageConfig {
+class SendMessageConfig {
 	private String url;//发送短信功能地址
 	private String userid;//企业ID
 	private String account;//用户名

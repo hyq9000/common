@@ -14,12 +14,12 @@ import org.apache.log4j.Logger;
  * @author yuqing
  */
 public class TestTool {
-	private static  long startn,startm;	
-
+	private long startn,startm;	
+	
 	/**
 	 * 计时开始
 	 */
-	public  static void start(){
+	public  void start(){
 		//记下开始时的纳秒数及hao秒数
 		startn=System.nanoTime();
 		startm=System.currentTimeMillis();
@@ -29,9 +29,9 @@ public class TestTool {
 	 * 计时结束，并向日志输出此次计时结果；
 	 * @param utilName 计时目录模块的名称；
 	 */
-	public  static void end(String utilName){
+	public  void end(String utilName){
 		long ns=System.nanoTime()-startn,ms=System.currentTimeMillis()-startm;
-		String msg=utilName+"花了:\t\t\t"+ns+"ns\t\t\t"+ms+"ms\n";
-		Logger.getLogger(TestTool.class.getName()).info(msg);
+		String msg="("+utilName+")===耗时:\t\t"+ns+"ns\t\t"+ms+"ms\n";
+		Logger.getLogger("").debug(msg);
 	}
 }

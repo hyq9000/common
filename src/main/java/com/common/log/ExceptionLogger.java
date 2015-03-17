@@ -36,7 +36,10 @@ public class ExceptionLogger{
 	 * @param exception 导常对象，如没有，可设置为null
 	 * @param source 调用日志的类型
 	 */
-	public static void writeLog(int grad,String logContent,Exception exception,Class clazz){
+	public static long writeLog(int grad,String logContent,Exception exception,Class clazz){
+		long eid=0-System.currentTimeMillis();
+		Logger.getLogger("").error("异常ID: @"+eid);
+		//Logger.getLogger(clazz).error();
 		//LOG4J实现
 		switch(grad){
 			case 1:Logger.getLogger(clazz).debug(logContent,exception);break;
@@ -45,16 +48,38 @@ public class ExceptionLogger{
 			case 4:Logger.getLogger(clazz).error(logContent,exception);break;
 			case 5:Logger.getLogger(clazz).fatal(logContent,exception);break;
 		}
+		return eid;
 	}
 	
 	/**
 	 * 写错误日志,隔离具体体的log实现组件:
 	 * @param e 异常实例
 	 * @param source 发生异常时对象实例
-	 */
+	 
 	public static void writeLog(Exception e,Object source){
 		//LOG4J实现
 		Logger.getLogger(source.getClass()).error("异常：",e);
+	}*/
+	
+	/**
+	 * 写错误日志,隔离具体体的log实现组件:
+	 * @param e 异常实例
+	 * @param clazz 发生异常时类型实例
+	 
+	public static void writeLog(Exception e,Class clazz){
+		//LOG4J实现
+		Logger.getLogger(clazz).error("异常：",e);
+	}
+	*/
+	
+	
+	/**
+	 * 写错误日志,隔离具体体的log实现组件:
+	 * @param e 异常实例
+	 * @param source 发生异常时对象实例
+	 */
+	public static long writeLog(Exception e,Object source){
+		return writeLog(4, "异常",e, source.getClass());
 	}
 	
 	/**
@@ -62,8 +87,7 @@ public class ExceptionLogger{
 	 * @param e 异常实例
 	 * @param clazz 发生异常时类型实例
 	 */
-	public static void writeLog(Exception e,Class clazz){
-		//LOG4J实现
-		Logger.getLogger(clazz).error("异常：",e);
+	public static long writeLog(Exception e,Class clazz){
+		return writeLog(4, "异常",e, clazz);
 	}
 }
