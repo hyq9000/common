@@ -281,6 +281,27 @@ public class WebUtils {
 		} 
 	}
 
+	/**
+	 * 获得条件比较操作符对应于com.common.dbutil.Dao相对应的比较符码;
+	 * @param flag 可以是 (=,>,<,>=,<=,like)6种操作
+	 * @return flag非 (=,>,<,>=,<=,like),返回-1;
+	 */
+	public static int getCodeByString(String flag){
+		if(flag.equals("="))
+			return 0;
+		else if(flag.equals(">"))
+			return 1;
+		else if(flag.equals("<"))
+			return 2;
+		else if(flag.equals(">="))
+			return 10;
+		else if(flag.equals("<="))
+			return 20;
+		else if(flag.equals("like"))
+			return 3;
+		
+		return -1;
+	}
 	
 	
 }
