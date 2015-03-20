@@ -1136,4 +1136,16 @@ public class NewsmyCache implements ApplicationCache{
 			}
 		}
 	}
+
+
+	@Override
+	public void remove(Serializable key) {
+		;		
+	}
+
+
+	@Override
+	public void put(Serializable key, Object value) {
+		;
+	}
 }

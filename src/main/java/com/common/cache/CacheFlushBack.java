@@ -6,7 +6,6 @@ package com.common.cache;
  * @author hyq
  */
 public interface CacheFlushBack {
-
 	/**
 	 * 将缓存中有更新的数据项,同步更新到数据库
 	 * @return 成功更新的条数:要不就是0条,要不就是有更新的数据数;

@@ -12,7 +12,7 @@ import com.common.dbutil.Paging;
  * <BR/>创建时间：2012年05月25日
  * @author yuqing
  */
-public interface ApplicationCache {
+public interface ApplicationCache extends ICache{
 	/**
 	 * 缓存操作类型:代表新增缓存
 	 */

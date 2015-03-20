@@ -14,8 +14,8 @@ public class EjbCacheInterceptor {
 	public Object doCache(InvocationContext ctx){	
 		Object rs=null;		
 		try {
-			if(ctx.getMethod().isAnnotationPresent(Cache.class)){
-				Cache cc=ctx.getMethod().getAnnotation(Cache.class);
+			if(ctx.getMethod().isAnnotationPresent(AnCache.class)){
+				AnCache cc=ctx.getMethod().getAnnotation(AnCache.class);
 				String key=cc.key();
 				rs=appCache.get(key);
 				if(rs==null)
