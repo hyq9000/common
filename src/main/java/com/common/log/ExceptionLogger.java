@@ -39,7 +39,6 @@ public class ExceptionLogger{
 	public static long writeLog(int grad,String logContent,Exception exception,Class clazz){
 		long eid=0-System.currentTimeMillis();
 		Logger.getLogger("").error("异常ID: @"+eid);
-		//Logger.getLogger(clazz).error();
 		//LOG4J实现
 		switch(grad){
 			case 1:Logger.getLogger(clazz).debug(logContent,exception);break;
@@ -50,27 +49,6 @@ public class ExceptionLogger{
 		}
 		return eid;
 	}
-	
-	/**
-	 * 写错误日志,隔离具体体的log实现组件:
-	 * @param e 异常实例
-	 * @param source 发生异常时对象实例
-	 
-	public static void writeLog(Exception e,Object source){
-		//LOG4J实现
-		Logger.getLogger(source.getClass()).error("异常：",e);
-	}*/
-	
-	/**
-	 * 写错误日志,隔离具体体的log实现组件:
-	 * @param e 异常实例
-	 * @param clazz 发生异常时类型实例
-	 
-	public static void writeLog(Exception e,Class clazz){
-		//LOG4J实现
-		Logger.getLogger(clazz).error("异常：",e);
-	}
-	*/
 	
 	
 	/**
