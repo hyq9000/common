@@ -3,10 +3,11 @@ package com.common.log;
 import org.apache.log4j.Logger;
 
 /**
- * 提供统一写异常日志的功能
+ * 提供统一写异常日志的功能,该类已经自(2014-6-10)弃用
+ *  </br>Date 2014-05-10
  * @author yuqing
- * </br>Date 2014-05-10
  */
+@Deprecated
 public class SystemLogger{	
 	/**
 	 * 致命错误

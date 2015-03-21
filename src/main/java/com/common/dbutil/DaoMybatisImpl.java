@@ -45,7 +45,9 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		public Object get(Serializable key, Paging paging) {return null;}		
 		public Object get(Serializable key) {return null;}		
 		public void clear() {}
-	};//NewsmyCache.getInstance(); 
+		public void put(Serializable key, Object value) {}
+		public void remove(Serializable key) {}
+	};
 	
 	private Class cls=null;
 	
