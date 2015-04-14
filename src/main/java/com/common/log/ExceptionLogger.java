@@ -30,7 +30,7 @@ public class ExceptionLogger{
 	public final static int DEBUG=1;
 	
 	/**
-	 * 根据指定日志等级，写日志
+	 * 根据指定日志等级，写日志,如果日志级别为ERROR、FATAL，则打印错误日志的ID号
 	 * @param grad 日志等级，包括ExceptionLogger.DEBUG、INFO、WARN、ERROR、FATAL
 	 * @param logContent
 	 * @param exception 导常对象，如没有，可设置为null
@@ -38,7 +38,8 @@ public class ExceptionLogger{
 	 */
 	public static long writeLog(int grad,String logContent,Exception exception,Class clazz){
 		long eid=0-System.currentTimeMillis();
-		Logger.getLogger("").error("异常ID: @"+eid);
+		if(grad==ERROR || grad==FATAL)
+			Logger.getLogger("").error("异常ID: @"+eid);
 		//LOG4J实现
 		switch(grad){
 			case 1:Logger.getLogger(clazz).debug(logContent,exception);break;
@@ -52,7 +53,7 @@ public class ExceptionLogger{
 	
 	
 	/**
-	 * 写错误日志,隔离具体体的log实现组件:
+	 * 写错误(bug级别为：ERROR)日志,隔离具体体的log实现组件:
 	 * @param e 异常实例
 	 * @param source 发生异常时对象实例
 	 */
@@ -61,7 +62,7 @@ public class ExceptionLogger{
 	}
 	
 	/**
-	 * 写错误日志,隔离具体体的log实现组件:
+	 * 写错误(bug级别)为：ERROR日志,隔离具体体的log实现组件:
 	 * @param e 异常实例
 	 * @param clazz 发生异常时类型实例
 	 */
