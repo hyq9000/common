@@ -36,7 +36,7 @@ public class ExceptionLogger{
 	 * @param exception 导常对象，如没有，可设置为null
 	 * @param source 调用日志的类型
 	 */
-	public static long writeLog(int grad,String logContent,Exception exception,Class clazz){
+	public synchronized static long writeLog(int grad,String logContent,Exception exception,Class clazz){
 		long eid=0-System.currentTimeMillis();
 		if(grad==ERROR || grad==FATAL)
 			Logger.getLogger("").error("异常ID: @"+eid);
@@ -56,6 +56,7 @@ public class ExceptionLogger{
 	 * 写错误(bug级别为：ERROR)日志,隔离具体体的log实现组件:
 	 * @param e 异常实例
 	 * @param source 发生异常时对象实例
+	 * @return 返回该异常的唯一编号
 	 */
 	public static long writeLog(Exception e,Object source){
 		return writeLog(4, "异常",e, source.getClass());
