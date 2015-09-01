@@ -254,6 +254,7 @@ public class WebUtils {
 			 * 将所有不包含在propertyNames内的字段的名-值取出,放到map中去
 			 */
 			for(Field field: list){
+				field.setAccessible(true);
 				Object rs=field.get(entity);
 				map.put(field.getName(), rs);
 			}			

@@ -13,9 +13,11 @@ import java.lang.reflect.ParameterizedType;
 
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -133,7 +135,13 @@ public abstract class DaoHibernateImpl<T>  implements Dao<T> {
 		//最后总数赋给paging.totalCount,否则，如果存在，则直接取出返回；
 		Integer totalCount=null;//TODO:此处的缓存暂时没有实现， appCache.getPagingCache(key);
 		
+		
 		String queryStr_=queryStr.trim().toUpperCase();
+		if(queryStr_.indexOf("UNION")!=-1){
+			//throw new RuntimeException("目前暂不支持union语法:(");
+			return 100;
+		}
+		
 		int fromIndex=fromIndex=DaoUtils.getFirstFrom(queryStr_); //SQL中第一个有效“FROM”的下标位置
 		//删除第一个有效“FROM"之前的所有？对应的参数；
 		final Object[] newParams=DaoUtils.getCountFrontOfFirstForm(queryStr_, fromIndex,parameters);
@@ -415,21 +423,28 @@ public abstract class DaoHibernateImpl<T>  implements Dao<T> {
 	public List executeQuery(final String sql, final Object... parameters) throws Exception {
 		final List<String> alias=DaoUtils.getAliasName(sql);
 		List list=this.getHibernateTemplate().executeFind(new HibernateCallback<List>() {
-	
+		
 			@Override
 			public List doInHibernate(Session session) throws HibernateException,
 					SQLException {				
 				SQLQuery query=session.createSQLQuery(sql);				
 				for(String alia :alias )
 					query.addScalar(alia);
+			
 				query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
-				/* 拼接sql语句参数 */
-				for(int i=0;parameters!=null && i<parameters.length;i++){
-					query.setParameter(i,parameters[i]);
-				}	
+				/* 
+				 * 新增parameters的是否为null判断 
+				 * 2015-8-13
+				 */
+				if(!DaoUtils.isAllNull(parameters)){
+					/* 拼接sql语句参数 */
+					for(int i=0; i<parameters.length;i++){
+						query.setParameter(i,parameters[i]);
+					}	
+				}
 				return query.list();
 			}
-		});		
+		});	
 		return 	Collections.synchronizedList(list);
 	}
 	
@@ -512,11 +527,16 @@ public abstract class DaoHibernateImpl<T>  implements Dao<T> {
 				for(String alia :alias )
 					query.addScalar(alia);
 				query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
-				
-				/* 拼接sql语句参数 */
-				for(int i=0;parameters!=null && i<parameters.length;i++){
-					query.setParameter(i,parameters[i]);
-				}	
+				/* 
+				 * 新增parameters的是否为null判断 
+				 * 2015-8-13
+				 */
+				if(!DaoUtils.isAllNull(parameters)){
+					/* 拼接sql语句参数 */
+					for(int i=0;parameters!=null && i<parameters.length;i++){
+						query.setParameter(i,parameters[i]);
+					}
+				}
 				query.setFirstResult((pn-1)*ps);
 				query.setMaxResults(ps);				
 				List list_tmp=query.list();				

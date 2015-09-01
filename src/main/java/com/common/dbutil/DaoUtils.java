@@ -172,4 +172,21 @@ class DaoUtils {
 		}else
 			return params;
 	}
+	 
+	 /**
+	  * 方法功能描述：判断给定的参数值是否是全部为null	  * 
+	  * @param parameters
+	  * @return 如全部为null则返回true,否则返回false
+	  */
+	 protected static boolean isAllNull(Object... parameters){
+		 boolean isNull=true;
+		 if(parameters!=null && parameters.length>0){			
+			 for(int i=0;i<parameters.length;i++){
+				 if(parameters[i]!=null){
+					 return false;
+				 }
+			 }
+		 }
+		 return isNull;
+	 }
 }

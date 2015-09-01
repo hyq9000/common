@@ -54,6 +54,14 @@ public class HttpUtils {
 	
 	public static HttpResponse get(String action,Map parameters,Map headers){
 		HttpClient tc=HttpClientBuilder.create().build();
+		if(parameters!=null && parameters.size()>0){
+			List<NameValuePair> params=new ArrayList<NameValuePair>();
+			action+="?";
+			for(Object entry : parameters.entrySet()){
+				Map.Entry<String, String> tmp=(Map.Entry<String, String>)entry;
+					action+=tmp.getKey()+"="+tmp.getValue()+"&";
+			}
+		}
 		HttpGet get=new HttpGet(action);
 		if(headers!=null && headers.size()>0){
 			for(Object entry : headers.entrySet()){
@@ -61,7 +69,8 @@ public class HttpUtils {
 				get.setHeader(tmp.getKey(),tmp.getValue());
 			}
 		}
-		try {
+		
+		try {			
 			return tc.execute(get);
 		}catch(ClientProtocolException e1){
 			ExceptionLogger.writeLog(e1, HttpUtils.class);
