@@ -22,12 +22,14 @@ import com.common.dbutil.Paging;
  */
 public interface OperationLogService extends Dao<OperationLog> {
 	
+	
+	
 	/**
-	 * 添加操作日志
+	 * 批量添加操作日志
 	 * @param log
 	 * @throws Exception
 	 */
-	public void addOperationLog(OperationLog log) throws Exception;
+	public void addOperationLog(List<OperationLog> logs) throws Exception;
 	
 
 	

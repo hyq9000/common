@@ -21,8 +21,21 @@ import com.common.dbutil.Paging;
 public class OperationLogServiceImpl extends DaoHibernateImpl<OperationLog> 
         implements OperationLogService {
 
-	public void addOperationLog(OperationLog log) throws Exception {
-		super.add(log);
+	public void addOperationLog(List<OperationLog> logs) throws Exception {
+		StringBuffer sql=new StringBuffer("insert into cloud_operation_log(LOG_IP,LOG_TIME,LOG_USER,LOG_CONTENT,LOG_DEVICE_CODE,LOG_DATA_ID) values ");
+		List parameters=new ArrayList();
+		for(int i=0;i<logs.size();i++){
+			sql.append("(?,?,?,?,?,?),");
+			OperationLog tmp=logs.get(i);
+			parameters.add(tmp.getLogIP());
+			parameters.add(tmp.getLogTime());
+			parameters.add(tmp.getLogUser());
+			parameters.add(tmp.getLogContent());
+			parameters.add(tmp.getDeviceCode());
+			parameters.add(tmp.getDataId());
+		}
+		sql.deleteCharAt(sql.length()-1);
+		this.executeUpdate(sql.toString(),parameters.toArray());
 	}
 
 

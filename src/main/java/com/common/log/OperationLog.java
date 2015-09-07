@@ -15,9 +15,6 @@ import javax.persistence.Table;
 @Table(name = "cloud_operation_log")
 public class OperationLog implements java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 4262992130684694329L;
 	// Fields
 	private Integer logId;
@@ -25,6 +22,11 @@ public class OperationLog implements java.io.Serializable {
 	private String logUser;
 	private String logContent;
 	private Timestamp logTime;
+	/* 新加设备码,数据记录ID
+	 * hyq 2015-9-7*/ 
+	private byte deviceCode ;
+	private String dataId;
+	/* end */
 
 	/**
 	 * 重定义equals函数
@@ -57,6 +59,19 @@ public class OperationLog implements java.io.Serializable {
 		this.logUser = logUser;
 		this.logContent = logContent;
 		this.logTime = logTime;
+	}
+	
+	/** hyq 2015-9-7 */
+	public OperationLog( String logIP,
+			String logUser, String logContent, Timestamp logTime,
+			byte deviceCode,String dataId) {
+		this.logId = logId;
+		this.logIP = logIP;
+		this.logUser = logUser;
+		this.logContent = logContent;
+		this.logTime = logTime;
+		this.dataId=dataId;
+		this.deviceCode=deviceCode;
 	}
 
 	// Property accessors
@@ -105,6 +120,24 @@ public class OperationLog implements java.io.Serializable {
 	
 	public void setLogContent(String logContent) {
 		this.logContent = logContent;
+	}
+
+	@Column(name = "LOG_DEVICE_CODE")
+	public byte getDeviceCode() {
+		return deviceCode;
+	}
+
+	public void setDeviceCode(byte deviceCode) {
+		this.deviceCode = deviceCode;
+	}
+	
+	@Column(name = "LOG_DATA_ID")
+	public String getDataId() {
+		return dataId;
+	}
+
+	public void setDataId(String dataId) {
+		this.dataId = dataId;
 	}
 	
 }

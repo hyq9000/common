@@ -2,7 +2,11 @@ package com.common.log;
 
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -22,11 +26,16 @@ import com.common.web.WebContextUtil;
 /**
  * 一个系统操作日志的通知，该通知会被织入到所有的Action的标注了@Log的所有方法上去；
  * 以实现为系统的操作加上日志功能；要求被织入的连接点方法上的异常不应处理,而应抛出；
+ * 实现思路:	
+ * 1,每次有操作，并不实际写数据库保存，而是缓存在一个Vector中；并在另一个线程中，
+ * 每隔一段时间，将缓存的日志写回数据库，并清空缓存；
  * <br/>时间：2012-7-16
  * @author yuqing
  */
 public class LogAdvice implements MethodInterceptor {	
+	private static LogThread _logThreadInstance;
 	private OperationLogService service;
+	private Vector<OperationLog> list=new Vector<OperationLog>();
 	public void setService(OperationLogService service) {
 		this.service = service;
 	}	
@@ -94,7 +103,16 @@ public class LogAdvice implements MethodInterceptor {
 			}
 			
 		}
-		new LogThread(request.getRemoteAddr(), userName, content, service).start();
+		//TODO:为每一个操作,新建一个线程,是可以优化的;
+		if(_logThreadInstance==null){
+			_logThreadInstance= new LogThread(request.getRemoteAddr(), userName, content, service);
+			_logThreadInstance.start();
+		}
+		list.add(new OperationLog(request.getRemoteAddr(), 
+				userName, 
+				content,
+				new Timestamp(new Date().getTime()),
+				(byte)1,"-1"));
 		return rs;
 	}
 
@@ -103,8 +121,9 @@ public class LogAdvice implements MethodInterceptor {
 	 * <br/>时间：2012-11-9
 	 * @author yuqing
 	 */
-	class LogThread extends Thread{
-		private OperationLogService service;;
+	class LogThread extends Thread{		
+
+		private OperationLogService service;
 		private OperationLog opLog=new OperationLog();
 		/**
 		 * 构造线程执行的必要参数
@@ -122,10 +141,40 @@ public class LogAdvice implements MethodInterceptor {
 			opLog.setLogUser(userName);			
 		}
 		
+		
+		/**
+		 * 构造线程执行的必要参数  hyq 2015-9-8
+		 * @param ip 当前发送请求的IP
+		 * @param user 当前用户实例；
+		 * @param content 日志记录内容；
+		 * @param log	日志标注实例；
+		 * @param service 日志服务实例；
+		 */
+		public LogThread(String ip ,String userName,String content,OperationLogService service,
+				byte deviceCode,String dataId){			
+			this.service=service;
+			opLog.setLogIP(ip);
+			opLog.setLogTime(new Timestamp(new Date().getTime()));
+			opLog.setLogContent(content);
+			opLog.setLogUser(userName);	
+			opLog.setDataId(dataId);
+			opLog.setDeviceCode(deviceCode);
+		}
+		
 		@Override
 		public void run() {	
 			try {
-				this.service.add(opLog);
+				//每隔1分钟执行一次新增操作日志;
+				while(true){					
+					synchronized (list) {
+						if (list.size() > 0) {
+							service.addOperationLog(list);
+							list.clear();
+						}
+					}
+					
+					Thread.currentThread().sleep(60*1000);
+				}
 			} catch (Exception e) {					
 				Logger.getLogger(service.getClass()).error("错误:",e);
 			}	
