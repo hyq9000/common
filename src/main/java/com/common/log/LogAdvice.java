@@ -104,8 +104,9 @@ public class LogAdvice implements MethodInterceptor {
 			
 		}
 		//TODO:为每一个操作,新建一个线程,是可以优化的;
+		//new LogThread(request.getRemoteAddr(), userName, content, service).start();
 		if(_logThreadInstance==null){
-			_logThreadInstance= new LogThread(request.getRemoteAddr(), userName, content, service);
+			_logThreadInstance= new LogThread(service);
 			_logThreadInstance.start();
 		}
 		list.add(new OperationLog(request.getRemoteAddr(), 
@@ -141,25 +142,7 @@ public class LogAdvice implements MethodInterceptor {
 			opLog.setLogUser(userName);			
 		}
 		
-		
-		/**
-		 * 构造线程执行的必要参数  hyq 2015-9-8
-		 * @param ip 当前发送请求的IP
-		 * @param user 当前用户实例；
-		 * @param content 日志记录内容；
-		 * @param log	日志标注实例；
-		 * @param service 日志服务实例；
-		 */
-		public LogThread(String ip ,String userName,String content,OperationLogService service,
-				byte deviceCode,String dataId){			
-			this.service=service;
-			opLog.setLogIP(ip);
-			opLog.setLogTime(new Timestamp(new Date().getTime()));
-			opLog.setLogContent(content);
-			opLog.setLogUser(userName);	
-			opLog.setDataId(dataId);
-			opLog.setDeviceCode(deviceCode);
-		}
+		public LogThread(OperationLogService service){}
 		
 		@Override
 		public void run() {	
@@ -179,7 +162,6 @@ public class LogAdvice implements MethodInterceptor {
 				Logger.getLogger(service.getClass()).error("错误:",e);
 			}	
 		}			
-		
 	}
 	
 	public static void main(String[] args) throws Exception{
