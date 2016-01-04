@@ -59,8 +59,8 @@ public class QrCode {
 
 	public static void main(String[] args) {
 		try {
-			//encode("test.test.test", new File("c:\\test.png"));
-			System.out.println(uncode("c:\\test.png"));
+			encode("test.test.test","d:\\test2.png");
+			//System.out.println(uncode("c:\\test1.png"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

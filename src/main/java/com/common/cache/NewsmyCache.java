@@ -1148,4 +1148,9 @@ public class NewsmyCache implements ApplicationCache{
 	public void put(Serializable key, Object value) {
 		;
 	}
+	
+	@Override
+	public void put(Serializable key, Object value, long timeLength) {
+		// TODO Auto-generated method stub		
+	}
 }

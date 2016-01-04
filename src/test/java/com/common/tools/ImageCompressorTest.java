@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-public class ImageCompressorTest extends TestCase {
+ class ImageCompressorTest{ //extends TestCase {
 	ImageCompressor com=new ImageCompressor("C:\\Users\\Public\\Pictures\\Sample Pictures\\test.jpg");
 
 

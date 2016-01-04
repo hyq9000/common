@@ -5,66 +5,66 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang.reflect.FieldUtils;
-import org.apache.struts2.json.JSONException;
-import org.apache.struts2.json.JSONUtil;
 import com.common.log.ExceptionLogger;
+import net.sf.json.JSONObject;
 
 /**
- * 
  * 类型描述:封装一些与web相关公共逻辑实现
  * </br>创建时期: 2014年12月27日
  * @author hyq
  */
 public class WebUtils {
 	/**
-	 * 将响应到客户端的响应JSON,格式化成以下固定格式:<pre>
+	 * 将给定参数的值，响应成一个json字符串
+	 
+	 * @param data 要响应的数据对象
+	 * @param code 响应码
+	 * @param error 错误文本
+	 * @param logId 异常日志唯一串
+	 * @return 返回一个JSON串,格式如下:<pre>
 	 * {
-	 * 	code:一个整数响应码,(+n:正常响应;-n:业务相关错误码,须少于-2,0:无数据,-1:未知服务器异常,-2:会话超时)
-	 *  error:"业务相关错误消息文本",//此属性在code为n时方有,
-	 *  data:{一个具体的业务json对象}
+	 * 	code: 一个整数响应码,(+n:正常响应;-n:业务相关错误码,须少于-2,0:无数据,-100:未知服务器异常,-2:会话超时)
+	 *  error: "业务相关错误消息文本",//此属性在code为n时方有,
+	 *  data: {一个具体的业务json对象}，
+	 *  logId:一个长整型值,用于标记日志文件中的位置
 	 * }
-	 * </pre>
-	 * @param data
-	 * @param errorCode
-	 * @param responseCode
-	 * @return
+	 *  </pre>
 	 */
-	public static String responseJson(Object data,String errorMessage,int responseCode,long errorLogId){
+	public static String responseJson(Object data,String error,int code,long logId){
 		try {
 			Map<String, Object> map=new HashMap<String, Object>();
-			map.put("code", responseCode);
-			if(errorMessage!=null && !errorMessage.trim().equals(""))
-				map.put("error", errorMessage);
-			//errorLogId:为写到错误日志文件中的错误日志标识
-			if(errorLogId!=0)
-				map.put("errorLogId", errorLogId);
+			map.put("code", code);
+			if(error!=null && !error.trim().equals(""))
+				map.put("error", error);
+			//logId:为写到错误日志文件中的错误日志标识
+			if(logId!=0)
+				map.put("logId", logId);
 			if(data!=null)
 				map.put("data",data);
-			return JSONUtil.serialize(map);
-		} catch (JSONException e) {
-			ExceptionLogger.writeLog(e, WebUtils.class);
-			return "{\"code\":-1,\"error:\":\"服务器异常\"}";
+			return JSONObject.fromObject(map).toString();
+		} catch (Exception e) {
+			long eid=ExceptionLogger.writeLog(e, WebUtils.class);
+			return "{\"code\":-1,\"error:\":\"服务器异常\",\"errorId\":"+eid+"}";
 		}
 	}
 	
 	/**
-	 * 将业务数据响应到客户端,格式:<pre>
+	 * 只响应响应码、业务数据到客户端,格式:<pre>
 	 * {
 	 * 	code:一个整数响应码,(+n:正常响应;-n:业务相关错误码,须少于-2,1:操作成功;0:无数据,-1:未知服务器异常,-2:会话超时)
 	 *  data:{一个具体的业务json对象}
 	 * } 
 	 * </pre>
-	 * @param data
+	 * @param data 业务数据对象
 	 * @return
 	 */
-	public static String responseData(int responseCode,Object data){
-		return responseJson(data, null,responseCode,0);
+	public static String responseData(int code,Object data){
+		return responseJson(data, null,code,0);
 	}
 	
 	/**
-	 * 将业务数据响应到客户端,格式:<pre>
+	 * 只将业务数据响应到客户端,格式:<pre>
 	 * {
 	 * 	code:一个整数响应码,(+n:正常响应;-n:业务相关错误码,须少于-2,1:操作成功;0:无数据,-1:未知服务器异常,-2:会话超时)
 	 *  data:{一个具体的业务json对象}
@@ -79,41 +79,74 @@ public class WebUtils {
 	
 	
 	/**
-	 * 将业务相关异常,响应到客户端,格式:<pre>
+	 * 只响应错误文本,响应码到客户端>
+	 * @param error 错误文本
+	 * @param code 响应码
+	 * @return json格式:<pre>
 	 * {
 	 * 	code:一个整数响应码,(+n:正常响应;-n:业务相关错误码,须少于-2,1:操作成功;0:无数据,-1:未知服务器异常,-2:会话超时)
 	 *  error:"业务相关错误消息文本",//此属性在code为n时方有,
 	 * } 
+	 * </pre
+	 */
+	public static String responseError(String error,int code){
+		return responseJson(null, error,code,0);
+	}
+	
+	
+	/**
+	 * 只响应响应码、错误文本、异常日志唯一串到客户端	
+	 * @param error 错误文本
+	 * @param code 响应码
+	 * @param logId 异常日志唯一串
+	 * @return  json格式:<pre>
+	 * {
+	 * 	code:一个整数响应码,(+n:正常响应;-n:业务相关错误码,须少于-2,1:操作成功;0:无数据,-1:未知服务器异常,-2:会话超时)
+	 *  error:"业务相关错误消息文本",//此属性在code为n时方有,
+	 *  logId:“异常日志唯一串”
+	 * } 
 	 * </pre>
-	 * @param errorCode
-	 * @param responseCode
-	 * @return
 	 */
-	public static String responseError(String errorMessage,int responseCode){
-		return responseJson(null, errorMessage,responseCode,0);
+	public static String responseError(String error,int code,long logId){
+		return responseJson(null, error,code,logId);
 	}
 	
 	/**
-	 * 将"未知服务器异常"响应到客户端格式: {code:错误日志中的唯一标识号} 
-	 * @param exceptonCode
-	 * @return
+	 * 将响应码"-1"、错误文本"未知服务器异常"、logId响应到客户端
+	 * @param logId 错误日志唯一串；
+	 * @return json格式:<pre>
+	 * {
+	 * 	code:一个整数响应码,(+n:正常响应;-n:业务相关错误码,须少于-2,1:操作成功;0:无数据,-1:未知服务器异常,-2:会话超时)
+	 *  error:"业务相关错误消息文本",//此属性在code为n时方有,
+	 *  logId:“异常日志唯一串”
+	 * } 
+	 * </pre>
 	 */
-	public static String responseServerException(long exceptonCode){
-		return responseJson(null, "服务器发生异常!",-1,exceptonCode);
+	public static String responseServerException(long logId){
+		return responseJson(null, "服务器发生异常!",-1,logId);
 	}
 	
 	/**
-	 * 将"输入检验错误"响应到客户端格式: {code:-14} 
-	 * @return
+	 * 将错误文本、响应码"-14"响应到客户端:
+	 * @return json格式 <pre>
+	 * {
+	 * 	code:-14,
+	 * 	error:"错误文本"
+	 * } 
+	 * </pre>
 	 */
-	public static String responseInputCheckError(String errorText){
-		return responseJson(null, errorText,-14,0);
+	public static String responseInputCheckError(String error){
+		return responseJson(null, error,-14,0);
 	}
 	
-	
 	/**
-	 * 将"会话超时"响应到客户端格式: {code:-2} 
-	 * @return
+	 * 将错误文本"会话超时,请重新登录!"、响应码"-2"响应到客户端 
+	 * @return json格式 <pre>
+	 * {
+	 * 	code:-2,
+	 * 	error:"会话超时,请重新登录!"
+	 * } 
+	 * </pre>
 	 */
 	public static String responseSessionTimeout(){
 		return responseJson(null, "会话超时,请重新登录!",-2,0);
@@ -121,15 +154,19 @@ public class WebUtils {
 	
 	
 	/**
-	 * 将操作"状态码"响应到客户端格式: {code:n} 
-	 * n不可以为-1,-2;
-	 * @return
+	 * 将响应码响应到客户端,code不可以为-1,-2,-14;
+	 * @param code 响应码
+	 * @return  json格式 <pre>
+	 * {
+	 * 	code:code
+	 * } 
+	 * </pre>
 	 */
-	public static String responseCode(int responseCode) throws RuntimeException{
-		if(responseCode==-1 || responseCode==-2 || responseCode==-14){
+	public static String responseCode(int code) throws RuntimeException{
+		if(code==-1 || code==-2 || code==-14){
 			throw new RuntimeException("-1、-2,-14为系统预留值!");
 		}
-		return responseJson(null, null,responseCode,0);
+		return responseJson(null, null,code,0);
 	}
 	
 	/**

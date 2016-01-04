@@ -39,15 +39,14 @@ public class ExceptionLogger{
 	public synchronized static long writeLog(int grad,String logContent,Exception exception,Class clazz){
 		long eid=0-System.currentTimeMillis();
 		if(grad==ERROR || grad==FATAL)
-			Logger.getLogger("").error("异常ID: @"+eid);
+			Logger.getLogger("").error("错误ID: @"+eid+"||||||"+logContent,exception);
 		//LOG4J实现
-		switch(grad){
-			case 1:Logger.getLogger(clazz).debug(logContent,exception);break;
-			case 2:Logger.getLogger(clazz).info(logContent,exception);break;
-			case 3:Logger.getLogger(clazz).warn(logContent,exception);break;
-			case 4:Logger.getLogger(clazz).error(logContent,exception);break;
-			case 5:Logger.getLogger(clazz).fatal(logContent,exception);break;
-		}
+		else 
+			switch(grad){
+				case 1:Logger.getLogger(clazz).debug(logContent,exception);break;
+				case 2:Logger.getLogger(clazz).info(logContent,exception);break;
+				case 3:Logger.getLogger(clazz).warn(logContent,exception);break;
+			}
 		return eid;
 	}
 	
@@ -70,4 +69,14 @@ public class ExceptionLogger{
 	public static long writeLog(Exception e,Class clazz){
 		return writeLog(4, "异常",e, clazz);
 	}
+	
+	/**
+	 * 写错误(bug级别)为：ERROR日志,隔离具体体的log实现组件:
+	 * @param e 异常实例
+	 * @param clazz 发生异常时类型实例
+	 */
+	public static long writeLog(String content){
+		return writeLog(4,content,null,ExceptionLogger.class);
+	}
+
 }

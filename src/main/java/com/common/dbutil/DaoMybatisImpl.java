@@ -7,15 +7,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.ibatis.session.ResultContext;
-import org.apache.ibatis.session.ResultHandler;
-import org.apache.ibatis.session.RowBounds;
 import org.mybatis.spring.SqlSessionTemplate;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import com.common.cache.ApplicationCache;
-import com.common.cache.NewsmyCache;
 import com.common.cache.NewsmyCacheUtil;
 import com.common.log.ExceptionLogger;
 /**
@@ -34,7 +28,9 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 			QUERY_BY_ID=4,
 			QUERY_ALL=3;			
 	
-	//获取缓存全局变量;
+	/**
+	 * 提供一个缓存的空实现
+	 */
 	private ApplicationCache appCache =new ApplicationCache() {		
 		public void remove(Serializable key, Object value) {}		
 		public void putPagingCache(Serializable key, Integer totalCount) {}		
@@ -47,13 +43,15 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		public void clear() {}
 		public void put(Serializable key, Object value) {}
 		public void remove(Serializable key) {}
+		@Override
+		public void put(Serializable key, Object value, long timeLength) {}
 	};
 	
 	private Class cls=null;
 	
-	private SqlSessionTemplate sqlSessionTemplate;
+	@Autowired private SqlSessionTemplate sqlSessionTemplate;
 	/**
-	 * 桥接HibernateDaoSupport
+	 * 桥接MybatisDaoSupport
 	 * @param sessionFactory
 	 */	
 	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate){
@@ -109,7 +107,10 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	 */
 	public void add(T entity) {
 		String mapId = getSqlMapId(INSERT);		
-		/* 新增实体类对象插入数据库 */
+		/* 
+		 * 新增实体类对象插入数据库,为使自动得到当前新增的自增主键的值,需要在<insert> 标签中作如下配置
+		 *  useGeneratedKeys="true" keyProperty="id(主键的属性名)"
+		 */
 		this.sqlSessionTemplate.insert(mapId, entity);
 		/* 根据实体类对象获取缓存key */
 		Serializable key=NewsmyCacheUtil.getKey(entity);
@@ -140,8 +141,8 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 			case 0: mapId=an.insertMapId();break;
 			case 1: mapId=an.deleteMapId();break;
 			case 2: mapId=an.updateMapId();break;
-			case 3: mapId=an.queryAllMapId();break;
-			default: mapId=an.queryByIdMapId();
+			case 3: mapId=an.getAllMapId();break;
+			default: mapId=an.getByIdMapId();
 		}
 		/*
 		 * 如果设置了命名空间,则 sql mapid加上前辍;
@@ -398,13 +399,16 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	public List executeQuery(String mapId, Paging paging, Object... parameters)
 			throws Exception {
 		Map param =null;
-		if(parameters.length>1){
-			throw new Exception("给SQL传多个参数,须封装成map对象!");
-		}else{
+		if(parameters==null){
+			//分页的相关参数附在查询参数的最后
+			param = appendCountParameter(paging, new HashMap());
+		}else if(parameters.length==1){	
 			/*
 			 * 分页的相关参数附在查询参数的最后
-			*/			
+			 */			
 			param = appendCountParameter(paging, parameters[0]);
+		}else if(parameters.length>1){
+			throw new Exception("给SQL传多个参数,须封装成map对象!");
 		}
 		/*
 		 * 获得sql映射文件中的namespace值,重新拼接一个XX.XX.mapId格式的字符串

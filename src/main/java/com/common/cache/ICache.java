@@ -28,7 +28,14 @@ public interface ICache {
 	 * 将值对象放入缓存中;
 	 * @param key 键
 	 * @param value 值对象
-	 * @param cacheType 操作类型
 	 */
 	void put(Serializable key, Object value);
+	
+	/**
+	 * 将值对象放入缓存中;
+	 * @param key 
+	 * @param value 值对象
+	 * @param timeLength 放多长时间，单位:ms
+	 */
+	void put(Serializable key,Object value,long timeLength);
 }

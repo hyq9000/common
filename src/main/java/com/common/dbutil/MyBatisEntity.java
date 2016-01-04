@@ -16,7 +16,6 @@ import java.lang.annotation.Target;
 public @interface MyBatisEntity{
 	/**
 	 * 该值应与<mapper namespace="xxxx">中的xxxx保持一致,如未设置值,则默认为"";
-	 * @return 
 	 */
 	public String namespace() default "";
 	
@@ -24,31 +23,31 @@ public @interface MyBatisEntity{
 	 * 新增实体对象时所需SQL在mybatis中映射ID值;
 	 * 也就是<select id="id值" resultType="xxxx"></select>中的id值；
 	 */
-	public String insertMapId() default "";
+	public String insertMapId() default "insert";
 	/**
 	 * 修改实体对象时所需SQL在mybatis中映射ID值;
 	 * 也就是<select id="id值" resultType="xxxx"></select>中的id值；
 	 */
-	public String updateMapId()default "";
+	public String updateMapId()default "update";
 	/**
 	 * 删除实体对象时所需SQL在mybatis中映射ID值;
 	 * 也就是<select id="id值" resultType="xxxx"></select>中的id值；
 	 */
-	public String deleteMapId()default "";
+	public String deleteMapId()default "delete";
 	/**
 	 * 根据实体对象主键ID查询对象时所需SQL在mybatis中映射ID值;
 	 * 也就是<select id="id值" resultType="xxxx"></select>中的id值；
 	 */
-	public String queryByIdMapId()default "";
+	public String getByIdMapId()default "getById";
 	/**
 	 * 查询所有实体对象时所需SQL在mybatis中映射ID值;
 	 * 也就是<select id="id值" resultType="xxxx"></select>中的id值；
 	 */
-	public String queryAllMapId()default "";
+	public String getAllMapId()default "getAll";
+	
 	/**
 	 * 根据实体对象名称来查询实体对象时所需SQL在mybatis中映射ID值;
 	 * 也就是<select id="id值" resultType="xxxx"></select>中的id值；
-	 */
-	
-	public String getByNameMapId()default "";
+	 */	
+	public String getByNameMapId()default "getByName";
 }
