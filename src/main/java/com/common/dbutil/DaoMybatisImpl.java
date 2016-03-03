@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.Map;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+
 import com.common.cache.ApplicationCache;
+import com.common.cache.ICache;
 import com.common.cache.NewsmyCacheUtil;
 import com.common.log.ExceptionLogger;
 /**
@@ -43,19 +47,73 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		public void clear() {}
 		public void put(Serializable key, Object value) {}
 		public void remove(Serializable key) {}
-		@Override
 		public void put(Serializable key, Object value, long timeLength) {}
+		public Object get(Serializable key, String fieldName) throws Exception {return null;}
+		public void put(Serializable key, String fieldName, Object value, long timeLength){}
 	};
 	
 	private Class cls=null;
 	
-	@Autowired private SqlSessionTemplate sqlSessionTemplate;
+	/** 系统全局缓存  */
+    @Autowired protected ICache cache;
+	@Autowired @Qualifier("sqlSessionTemplate") private SqlSessionTemplate sqlSessionTemplate;
+	@Autowired private List<SqlSessionTemplate> readSqlSessionTemplateList;
+	/**
+     * 标识当前环境是生产或开发环境
+     */
+    @Value("#{configProperties['model']}")
+    protected String model;
 	/**
 	 * 桥接MybatisDaoSupport
 	 * @param sessionFactory
 	 */	
-	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate){
+	public void setWriteSessionTemplate(SqlSessionTemplate sqlSessionTemplate){
 		this.sqlSessionTemplate=sqlSessionTemplate;
+	}	
+	
+	public void setReadSqlSessionTemplateList(List<SqlSessionTemplate> readSqlSessionTemplateList) {
+		this.readSqlSessionTemplateList = readSqlSessionTemplateList;
+	}
+
+
+	/*
+	 * 记录最后访问只读服务器的下标；
+	 */
+	private int lastReadIndex=0;
+	/**
+	 * 如设置了读写分离时，读写分别采用不同的连池对象；并采用轮询机制；
+	 */
+	private  SqlSessionTemplate getReadSqlSessionTemplate(){			
+		if(readSqlSessionTemplateList==null || readSqlSessionTemplateList.size()==0)
+			return this.sqlSessionTemplate;
+		else{
+			/*
+			 * start 如果集合里边有一条为写数据的连接，则删除之；导致这个原因是@autowire所至;没有找到方案前，先程序处理
+			 */
+			int writeIndex=0;
+			boolean flag=false;
+			for(;writeIndex<readSqlSessionTemplateList.size();writeIndex++){
+				if(readSqlSessionTemplateList.get(writeIndex)==this.sqlSessionTemplate){
+					flag=true;
+					break;
+				}
+			}
+			if(flag)
+				readSqlSessionTemplateList.remove(writeIndex);
+			/* end  */
+			if(readSqlSessionTemplateList.size()>0){
+				if(readSqlSessionTemplateList.size()==lastReadIndex){
+					lastReadIndex=0;
+					ExceptionLogger.writeLog(ExceptionLogger.DEBUG,"当前应用第："+lastReadIndex+"个只读数据连接",null,this.getClass());
+					return this.readSqlSessionTemplateList.get(lastReadIndex);
+				}else{
+					ExceptionLogger.writeLog(ExceptionLogger.DEBUG,"当前应用第："+lastReadIndex+"个只读数据连接",null,this.getClass());
+					return this.readSqlSessionTemplateList.get(lastReadIndex++);
+				}
+			}else
+				return this.sqlSessionTemplate;
+				
+		}
 	}
 	
 	public 	DaoMybatisImpl(){					
@@ -87,7 +145,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		Integer totalCount = appCache.getPagingCache(mapId);
 		if(null == totalCount) {
 			try {
-				totalCount=this.sqlSessionTemplate.selectOne(mapId, parameters[0]);
+				totalCount=this.getReadSqlSessionTemplate().selectOne(mapId, parameters[0]);
 			} catch (Exception e) {				
 				e.printStackTrace();
 				throw new RuntimeException("分页的统计总行数的SQL映射ID规格为:'查数据的SQL映射ID_COUNT_TOTAL';如果查数据SQL映身为'getList',则统计总行数的SQL映射为:getList_COUNT_TOTAL");
@@ -196,18 +254,21 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	 * (non-Javadoc)
 	 * @see com.common.dbutil.Dao#update(java.lang.Object)
 	 */
-	public void update(T entity) {
+	public int update(T entity) {
 		//获取SQL映射ID
 		String mapId=this.getSqlMapId(UPDATE);
 		/* 根据实体类对象更新数据库 */
-		this.sqlSessionTemplate.update(mapId, entity);
-		/* 根据实体类对象获取缓存key */
-		Serializable key=NewsmyCacheUtil.getKey(entity);
-		/* 如果key存在，则更新缓存 */
-		if(key!=null)
-			appCache.put(key, entity, ApplicationCache.CACHE_TYPE_UPDATE);
+		int rs=this.sqlSessionTemplate.update(mapId, entity);
+		if(rs>0){
+    		/* 根据实体类对象获取缓存key */
+    		Serializable key=NewsmyCacheUtil.getKey(entity);
+    		/* 如果key存在，则更新缓存 */
+    		if(key!=null)
+    			appCache.put(key, entity, ApplicationCache.CACHE_TYPE_UPDATE);
+		}
+		return rs;
 	}
-
+	
 	
 	public T getById(Serializable id) {
 		/* 获取缓存key */
@@ -219,7 +280,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 			//获取SQL映射ID
 			String mapId=this.getSqlMapId(this.QUERY_BY_ID);			
 			/* 从数据库中查找对象 */
-			T o = (T) this.sqlSessionTemplate.selectOne(mapId,id);
+			T o = (T) this.getReadSqlSessionTemplate().selectOne(mapId,id);
 			/* 如果找到对象，则将对象添加到缓存中 */
 			if (o != null){
 				appCache.put(key, o, ApplicationCache.CACHE_TYPE_QUERY);
@@ -242,7 +303,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		/* 缓存中没有结果集时，再从数据库中查找结果集 */
 		if(tmp==null){			
 			/* 根据QL语句从数据库中查找结果 */			
-			List<T> list=(List<T>)this.sqlSessionTemplate.selectList(mapId);
+			List<T> list=(List<T>)this.getReadSqlSessionTemplate().selectList(mapId);
 			
 			/* list合法时，进行后续list处理 */
 			if(list!=null && list.size()>0){
@@ -314,7 +375,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		 * 获得sql映射文件中的namespace值,重新拼接一个XX.XX.mapId格式的字符串
 		 */
 		mapId=getAnnotationNamespaceValue(mapId);
-		List list=this.sqlSessionTemplate.selectList(mapId,params);
+		List list=this.getReadSqlSessionTemplate().selectList(mapId,params);
 		return 	Collections.synchronizedList(list);
 	}
 	
@@ -334,7 +395,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		if(tmp==null){
 			//将分页参数作为查询参数打包到查询参数中去
 			Object[] parameters={paging.getPageNo(),paging.getPageSize()};
-			list=this.sqlSessionTemplate.selectList(mapId,parameters);			
+			list=this.getReadSqlSessionTemplate().selectList(mapId,parameters);			
 			list=Collections.synchronizedList(list);
 			/* list合法，则进行后续操作 */
 			if(null != list && list.size() > 0) {
@@ -386,7 +447,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		 * 获得sql映射文件中的namespace值,重新拼接一个XX.XX.mapId格式的字符串
 		 */
 		mapId=getAnnotationNamespaceValue(mapId);
-		List list=this.sqlSessionTemplate.selectList(mapId,parameter);
+		List list=this.getReadSqlSessionTemplate().selectList(mapId,parameter);
 		
 		return 	Collections.synchronizedList(list);
 	}
@@ -414,7 +475,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		 * 获得sql映射文件中的namespace值,重新拼接一个XX.XX.mapId格式的字符串
 		 */
 		mapId=getAnnotationNamespaceValue(mapId);
-		List list=this.sqlSessionTemplate.selectList(mapId, param);
+		List list=this.getReadSqlSessionTemplate().selectList(mapId, param);
 		
 		//在查询结果里附上分页相关数据
 		if(list!=null && list.size()>0){
@@ -508,4 +569,9 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 		return this.executeQuery(sql, paging, null);
 	}	
 
+	@Override
+	public Object executeQueryOne(String sql, Object... parameters) throws Exception {
+		List list=this.executeQuery(sql,parameters);
+		return list==null||list.size()==0 ?null:list.get(0);
+	}
 }

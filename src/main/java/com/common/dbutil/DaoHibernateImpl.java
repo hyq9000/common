@@ -224,7 +224,7 @@ public abstract class DaoHibernateImpl<T>  implements Dao<T> {
 	}
 
 	
-	public void update(T entity) throws Exception{
+	public int update(T entity) throws Exception{
 		//TODO:在修改前，EM总是会自动的根据OID查询一下；
 		/* 根据实体类对象更新数据库 */
 		this.getHibernateTemplate().merge(entity);
@@ -233,6 +233,7 @@ public abstract class DaoHibernateImpl<T>  implements Dao<T> {
 		/* 如果key存在，则更新缓存 */
 		if(key!=null)
 			appCache.put(key, entity, ApplicationCache.CACHE_TYPE_UPDATE);
+		return 1;
 	}
 
 	

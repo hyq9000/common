@@ -59,7 +59,7 @@ public interface Dao<T> {
 	 * @param entity 待修改的实体对象，它必须有OID值
 	 * @exception 如果操作失败，则抛出异常；
 	 */
-	void update(T entity) throws Exception;
+	int update(T entity) throws Exception;
 
 	/**
 	 * 返回给定ID的实体对象实例
@@ -195,7 +195,7 @@ public interface Dao<T> {
 	
 	/**
 	 * 执行查询的SQL；分页返回查询的结果集；
-	 * @param sql 合法的查询SQL；如果是在mybatis实现下，则该参数是sqlid
+	 * @param sql 合法的查询SQL；如果是在mybatis实现下，则该参数是sql的映射id
 	 * @param paging 分页信息实例
 	 * @param parameters 该查询操作所需要的参数列表；
 	 * 	<li>如果是jdbc原始实现：则该参数列表是零到多个对象;
@@ -208,14 +208,14 @@ public interface Dao<T> {
 	List executeQuery(String sql,Paging paging,Object... parameters) throws Exception;
 	/**
 	 * 执行查询的SQL,返回查询结果集;
-	 * @param sql 合法的查询SQL；如果是在mybatis实现下，则该参数是sqlid
+	 * @param sql 合法的查询SQL；如果是在mybatis实现下，则该参数是sql的映射id
 	 * @return 返返回查询的结果List实例；list集合中的每个元素是查询结行数据，
 	 * @exception 如果执行失败
 	 */
 	List executeQuery(String sql) throws Exception;
 	/**
 	 *  执行查询的SQL；分页返回查询的结果集；
-	 * @param sql 合法的查询SQL；如果是在mybatis实现下，则该参数是sqlid
+	 * @param sql 合法的查询SQL；如果是在mybatis实现下，则该参数是sql的映射id
 	 * @param paging 分页信息实例
 	 * @return 返回查询的结果List实例；list集合中的每个元素是查询结果一行数据，
 	 * <br/>行数据一般是一个(列名:值)的map,<font color='red'>特别说明：该查询条件下的记录总行数，会封装到一个Paing实例，放在List的最后;
@@ -223,5 +223,16 @@ public interface Dao<T> {
 	 * @exception 如果执行失败
 	 */
 	List executeQuery(String sql,Paging paging) throws Exception;
+	
+	/**
+	 * 执行查询的SQL；返回查询的结果集的第一行；
+	 * @param sql 合法的查询SQL；如果是在mybatis实现下，则该参数是sql的映射id
+	 * @param parameters 该查询操作所需要的参数列表；
+	 * 	<li>如果是jdbc原始实现：则该参数列表是零到多个对象;
+	 *  <li>如果是mybatis实现， 则该参数列表应该组织成一个map，或一个实体实例；
+	 * @return 返回查询的结果集中的第一行数据对象，
+	 * @exception 如果执行失败
+	 */
+	Object executeQueryOne(String sql,Object... parameters) throws Exception;
 	
 }

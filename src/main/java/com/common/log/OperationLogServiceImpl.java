@@ -264,4 +264,11 @@ public class OperationLogServiceImpl extends DaoHibernateImpl<OperationLog>
 	}
 
 
+    @Override
+    public Object executeQueryOne(String sql, Object... parameters) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+
 }

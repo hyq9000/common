@@ -263,4 +263,11 @@ public class OperationLogServiceJpaImpl extends DaoJpaImpl<OperationLog>
 			throw e;
 		}
 	}
+
+
+    @Override
+    public Object executeQueryOne(String sql, Object... parameters) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

@@ -16,8 +16,7 @@ import net.sf.json.JSONObject;
  */
 public class WebUtils {
 	/**
-	 * 将给定参数的值，响应成一个json字符串
-	 
+	 * 将给定参数的值，响应成一个json字符串	 
 	 * @param data 要响应的数据对象
 	 * @param code 响应码
 	 * @param error 错误文本

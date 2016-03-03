@@ -132,9 +132,9 @@ public class DaoJdbcImpl implements Dao{
 		
 	}
 	@Override
-	public void update(Object entity) throws Exception {
+	public int update(Object entity) throws Exception {
 		// TODO Auto-generated method stub
-		
+		return 0;
 	}
 	@Override
 	public Object getById(Serializable id) {
@@ -211,4 +211,10 @@ public class DaoJdbcImpl implements Dao{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+    @Override
+    public Object executeQueryOne(String sql, Object... parameters) throws Exception {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

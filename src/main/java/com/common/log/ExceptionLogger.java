@@ -1,6 +1,7 @@
 package com.common.log;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 /**
  * 提供统一写异常日志的功能
@@ -16,17 +17,17 @@ public class ExceptionLogger{
 	 * 系统错误
 	 */
 	public final static int ERROR=4;
-		/**
-		 * 功能警告
-		 */
+	/**
+	 * 功能警告
+	 */
 	public final static int WARN=3;
-		/**
-		 * 运行信息
-		 */
+	/**
+	 * 运行信息
+	 */
 	public final static int INFO=2;
-		/**
-		 *  调试信息
-		 */
+	/**
+	 *  调试信息
+	 */
 	public final static int DEBUG=1;
 	
 	/**
@@ -39,7 +40,7 @@ public class ExceptionLogger{
 	public synchronized static long writeLog(int grad,String logContent,Exception exception,Class clazz){
 		long eid=0-System.currentTimeMillis();
 		if(grad==ERROR || grad==FATAL)
-			Logger.getLogger("").error("错误ID: @"+eid+"||||||"+logContent,exception);
+			Logger.getLogger("").error("LogId: @"+eid+"||||||"+logContent,exception);
 		//LOG4J实现
 		else 
 			switch(grad){
@@ -71,12 +72,21 @@ public class ExceptionLogger{
 	}
 	
 	/**
-	 * 写错误(bug级别)为：ERROR日志,隔离具体体的log实现组件:
-	 * @param e 异常实例
-	 * @param clazz 发生异常时类型实例
+	 * 写错误(bug级别info)为：隔离具体体的log实现组件:
 	 */
 	public static long writeLog(String content){
-		return writeLog(4,content,null,ExceptionLogger.class);
+		return writeLog(2,content,null,ExceptionLogger.class);
 	}
+	
+	
+	/**
+	 * 写错误(bug级别)为：ERROR日志,隔离具体体的log实现组件:
+	 * @param grad	日志等级，包括ExceptionLogger.DEBUG、INFO、WARN、ERROR、FATAL
+	 * @param logContent 日志内容
+	 */
+	public static long writeLog(int grad,String content){
+		return writeLog(grad,content,null,ExceptionLogger.class);
+	}
+	
 
 }
