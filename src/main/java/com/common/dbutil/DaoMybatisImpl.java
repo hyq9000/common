@@ -3,10 +3,12 @@ package com.common.dbutil;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -61,7 +63,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	/**
      * 标识当前环境是生产或开发环境
      */
-    @Value("#{configProperties['model']}")
+    @Value("#{config['model']}")
     protected String model;
 	/**
 	 * 桥接MybatisDaoSupport
@@ -163,7 +165,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	 * (non-Javadoc)
 	 * @see com.common.dbutil.Dao#add(java.lang.Object)
 	 */
-	public void add(T entity) {
+	public void add(T entity)throws Exception  {		
 		String mapId = getSqlMapId(INSERT);		
 		/* 
 		 * 新增实体类对象插入数据库,为使自动得到当前新增的自增主键的值,需要在<insert> 标签中作如下配置
@@ -216,7 +218,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	 * (non-Javadoc)
 	 * @see com.common.dbutil.Dao#delete(java.lang.Object)
 	 */
-	public void delete(T entity) {
+	public void delete(T entity) throws Exception  {
 		//获取SQL映射ID
 		String mapId=this.getSqlMapId(DELETE);
 		//得到实体主键ID
@@ -254,11 +256,16 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	 * (non-Javadoc)
 	 * @see com.common.dbutil.Dao#update(java.lang.Object)
 	 */
-	public int update(T entity) {
+	public int update(T entity) throws Exception {
+		
+		
+		
+		
 		//获取SQL映射ID
 		String mapId=this.getSqlMapId(UPDATE);
 		/* 根据实体类对象更新数据库 */
-		int rs=this.sqlSessionTemplate.update(mapId, entity);
+		int rs=0;
+		rs=this.sqlSessionTemplate.update(mapId, entity);
 		if(rs>0){
     		/* 根据实体类对象获取缓存key */
     		Serializable key=NewsmyCacheUtil.getKey(entity);
@@ -270,7 +277,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	}
 	
 	
-	public T getById(Serializable id) {
+	public T getById(Serializable id)throws Exception  {
 		/* 获取缓存key */
 		Serializable key=NewsmyCacheUtil.getKey(id,cls);
 		/* 根据key，先从缓存中获取对象 */
@@ -293,7 +300,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	}
 
 	
-	public List<T> getAll() {
+	public List<T> getAll()throws Exception  {
 		//获取SQL映射ID
 		String mapId=this.getSqlMapId(this.QUERY_ALL);
 		/* 获取缓存key */
@@ -321,11 +328,11 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	}
 
 	
-	public T getByName(String name) {
+	public T getByName(String name) throws Exception {
 		throw new RuntimeException("该方法还没有实现");
 	}	
 	
-	public int executeUpdate(String mapId,Object... parameters){
+	public int executeUpdate(String mapId,Object... parameters)throws Exception {
 		Object params=null;
 		if(parameters.length>1){
 			throw new RuntimeException("给SQL传多个参数,须封装到map对象!");
@@ -381,7 +388,7 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 	
 	
 
-	public List getAll(Paging paging) {
+	public List getAll(Paging paging)throws Exception  {
 		int totalCount=0;
 		/* 获取缓存key */
 		Serializable key=NewsmyCacheUtil.getKey(cls,paging.getPageNo());
@@ -571,7 +578,15 @@ public  class DaoMybatisImpl<T> implements Dao<T>{
 
 	@Override
 	public Object executeQueryOne(String sql, Object... parameters) throws Exception {
-		List list=this.executeQuery(sql,parameters);
+		List list = new ArrayList<>();
+		if( parameters != null && parameters.length>0){
+		    list=this.executeQuery(sql,parameters);
+		}else{
+			list = this.executeQuery(sql);
+		}
 		return list==null||list.size()==0 ?null:list.get(0);
 	}
+	
+	
+	
 }

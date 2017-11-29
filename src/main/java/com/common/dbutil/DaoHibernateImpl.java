@@ -682,6 +682,10 @@ public abstract class DaoHibernateImpl<T>  implements Dao<T> {
 	}
 	
 	
-	
+	@Override
+	public Object executeQueryOne(String sql, Object... parameters) throws Exception {
+	    List list= this.executeQuery(sql,parameters);
+	    return list==null || list.size()==0?null:list.get(0);
+	}
 
 }

@@ -122,7 +122,7 @@ public abstract class DaoJpaImpl<T> implements Dao<T> {
 		return totalCount;
 	}
 	
-	public void add(T entity) {
+	public void add(T entity)  throws Exception{
 		/* 新增实体类对象插入数据库 */
 		em.persist(entity);
 		/* 根据实体类对象获取缓存key */
@@ -133,7 +133,7 @@ public abstract class DaoJpaImpl<T> implements Dao<T> {
 	}
 
 	
-	public void delete(T entity) {
+	public void delete(T entity)  throws Exception{
 		/* 实体类对象从数据库中删除 */
 		em.remove(em.merge(entity));
 		/* 根据实体类对象获取缓存key */
@@ -144,7 +144,7 @@ public abstract class DaoJpaImpl<T> implements Dao<T> {
 	}
 
 	
-	public int update(T entity) {
+	public int update(T entity)  throws Exception{
 		//TODO:在修改前，EM总是会自动的根据OID查询一下；
 		/* 根据实体类对象更新数据库 */
 		em.merge(entity);
@@ -156,7 +156,7 @@ public abstract class DaoJpaImpl<T> implements Dao<T> {
 		return 1;
 	}
 	
-	public T getById(Serializable id) {
+	public T getById(Serializable id)  throws Exception{
 		/* 获取缓存key */
 		Serializable key=NewsmyCacheUtil.getKey(id,cls);
 		/* 根据key，先从缓存中获取对象 */
@@ -177,7 +177,7 @@ public abstract class DaoJpaImpl<T> implements Dao<T> {
 	}
 
 	
-	public List<T> getAll() {
+	public List<T> getAll()  throws Exception {
 		/* 获取缓存key */
 		Serializable key=NewsmyCacheUtil.getKey(cls);
 		/* 根据key，先从缓存中获取结果集 */
@@ -459,7 +459,7 @@ public abstract class DaoJpaImpl<T> implements Dao<T> {
 		return rs;
 	}	
 
-	public List getAll(Paging paging) {
+	public List getAll(Paging paging)  throws Exception{
 		int totalCount;
 		//性能测试监时处理程序；
 		TestTool tool=new TestTool();
