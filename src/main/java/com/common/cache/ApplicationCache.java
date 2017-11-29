@@ -36,7 +36,7 @@ public interface ApplicationCache extends ICache{
 	 * @param key  键
 	 * @return 如果有key对应的值，则返回，否则返回null;
 	 */
-	Object get(Serializable key);
+	Object get(Serializable key) throws Exception;
 	
 	
 	/**
@@ -45,7 +45,7 @@ public interface ApplicationCache extends ICache{
 	 * @param paging 分页对象
 	 * @return 如果有key对应的分页缓存，则返回，否则返回null;
 	 */
-	Object get(Serializable key, Paging paging);
+	Object get(Serializable key, Paging paging) throws Exception;
 	
 	
 	/**
@@ -54,7 +54,7 @@ public interface ApplicationCache extends ICache{
 	 * @param value 值对象
 	 * @param cacheType 操作类型
 	 */
-	void put(Serializable key, Object value, int cacheType);
+	void put(Serializable key, Object value, int cacheType)  throws Exception;
 	
 	
 	/**
@@ -63,14 +63,14 @@ public interface ApplicationCache extends ICache{
 	 * @param value 值对象
 	 * @param paging 分页对象
 	 */
-	void put(Serializable key, Object value, Paging paging);
+	void put(Serializable key, Object value, Paging paging) throws Exception;
 	
 	/**
 	 * 从缓存中删除给定的KEY所对应的值对象；
 	 * @param key 键
 	 * @param value 值对象
 	 */
-	void remove(Serializable key, Object value);
+	void remove(Serializable key, Object value) throws Exception;
 	
 	/**
 	 *清理缓存；

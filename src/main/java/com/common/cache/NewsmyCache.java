@@ -1139,18 +1139,30 @@ public class NewsmyCache implements ApplicationCache{
 
 
 	@Override
-	public void remove(Serializable key) {
+	public void remove(Serializable key)  throws Exception{
 		;		
 	}
 
 
 	@Override
-	public void put(Serializable key, Object value) {
+	public void put(Serializable key, Object value) throws Exception {
 		;
 	}
 	
 	@Override
-	public void put(Serializable key, Object value, long timeLength) {
+	public void put(Serializable key, Object value, long timeLength)  throws Exception{
 		// TODO Auto-generated method stub		
+	}
+	
+	@Override
+	public void put(Serializable key, String fieldName, Object value, long timeLength) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public Object get(Serializable key, String fieldName) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
