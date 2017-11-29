@@ -19,9 +19,9 @@ public interface EntityService<T> {
 	/**
 	 * 修改
 	 * @param entity
-	 * @return
+	 * @return 如果修改成功，则返回1
 	 */
-	void update(T entity)  throws Exception;
+	int update(T entity)  throws Exception;
 	/**
 	 * 删除
 	 * @param entity
