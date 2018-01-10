@@ -1,6 +1,7 @@
 package com.common.template;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.io.Writer;
 
 import javax.servlet.jsp.JspWriter;
 
+import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -34,10 +36,12 @@ public class FreeMarkUtil {
 		Configuration cfg = new Configuration();
 		// 指定模板文件从何处加载的数据源，这里设置成一个文件目录。
 		try {
-			String fileDir=filePath.substring(0,filePath.lastIndexOf("\\"));
-			String fileName=filePath.substring(filePath.lastIndexOf("\\")+1);
+			String fileSeparator=SystemUtils.FILE_SEPARATOR;
+			String fileDir=filePath.substring(0,filePath.lastIndexOf(fileSeparator));
+			String fileName=filePath.substring(filePath.lastIndexOf(fileSeparator)+1);
 			cfg.setDirectoryForTemplateLoading(new File(fileDir));
 			Template tmp=cfg.getTemplate(fileName,"UTF-8");
+			
 			// 指定模板如何检索数据模型，这是一个高级的主题,但先可以这么来用：
 			cfg.setObjectWrapper(new DefaultObjectWrapper());	
 			StringWriter writer=new StringWriter();
@@ -60,14 +64,43 @@ public class FreeMarkUtil {
 		Configuration cfg = new Configuration();
 		// 指定模板文件从何处加载的数据源，这里设置成一个文件目录。
 		try {
-			String fileDir=filePath.substring(0,filePath.lastIndexOf("\\"));
-			String fileName=filePath.substring(filePath.lastIndexOf("\\")+1);
+			String fileSeparator=SystemUtils.FILE_SEPARATOR;
+			String fileDir=filePath.substring(0,filePath.lastIndexOf(fileSeparator));
+			String fileName=filePath.substring(filePath.lastIndexOf(fileSeparator)+1);
 			cfg.setDirectoryForTemplateLoading(new File(fileDir));
 			Template tmp=cfg.getTemplate(fileName,"UTF-8");
 			// 指定模板如何检索数据模型，这是一个高级的主题,但先可以这么来用：
 			cfg.setObjectWrapper(new DefaultObjectWrapper());
 			tmp.process(root, out);			
 			out.flush();
+		} catch (IOException e) {		
+			Logger.getLogger(FreeMarkUtil.class).error("错误:找不到模板文件"+filePath);
+		} catch (TemplateException e) {
+			Logger.getLogger(FreeMarkUtil.class).error("错误:模板文件语法错误!",e);
+		}
+	}
+	
+	
+	/**
+	 * 根据给定的模板，将动态内容与模板文件合并后输出响应；
+	 * @param filePath 模板文件的物理路径；
+	 * @param root 动态数据；
+	 */
+	public static  void flushContent(String filePath,Map root,String targetFile){
+		Configuration cfg = new Configuration();
+		// 指定模板文件从何处加载的数据源，这里设置成一个文件目录。
+		try {
+			String fileSeparator=SystemUtils.FILE_SEPARATOR;
+			String fileDir=filePath.substring(0,filePath.lastIndexOf(fileSeparator));
+			String fileName=filePath.substring(filePath.lastIndexOf(fileSeparator)+1);
+			cfg.setDirectoryForTemplateLoading(new File(fileDir));
+			Template tmp=cfg.getTemplate(fileName,"UTF-8");
+			// 指定模板如何检索数据模型，这是一个高级的主题,但先可以这么来用：
+			cfg.setObjectWrapper(new DefaultObjectWrapper());
+			FileWriter out=new FileWriter(targetFile);
+			tmp.process(root, out);			
+			out.flush();
+			out.close();
 		} catch (IOException e) {		
 			Logger.getLogger(FreeMarkUtil.class).error("错误:找不到模板文件"+filePath);
 		} catch (TemplateException e) {
