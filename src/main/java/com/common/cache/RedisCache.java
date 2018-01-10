@@ -11,7 +11,6 @@ import java.util.Set;
 import com.common.log.ExceptionLogger;
 
 import redis.clients.jedis.Jedis;
-
 /**
  * 类型描述:一个redis缓存机制实现
  * </br>创建时期: 2016年1月20日
