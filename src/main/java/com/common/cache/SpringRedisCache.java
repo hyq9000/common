@@ -1,16 +1,32 @@
 package com.common.cache;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
 import com.common.log.ExceptionLogger;
+
+import redis.clients.jedis.Jedis;
 
 /**
  * 类型描述:一个redis缓存机制实现 </br>创建时期: 2016年1月20日
@@ -20,7 +36,9 @@ import com.common.log.ExceptionLogger;
 public class SpringRedisCache implements ICache {
 	@Autowired
 	private RedisTemplate<Serializable, Serializable> redisTemplate;
-
+	/** redis 订阅消息时的队列*/
+	//private BlockingQueue subscribeMesageQueuen=new LinkedBlockingDeque();
+	
 	public void setRedisTemplate(
 			RedisTemplate<Serializable, Serializable> redisTemplate) {
 		this.redisTemplate = redisTemplate;
@@ -56,6 +74,26 @@ public class SpringRedisCache implements ICache {
 					throws DataAccessException {
 				try {
 					return connection.del(SpringRedisCache.this.getKey(key));
+				} catch (Exception e) {
+					ExceptionLogger.writeLog(e, this.getClass());
+					return null;
+				}
+			}
+		});
+
+	}
+	
+	
+	@Override
+	public void remove(Serializable key,String fieldName) throws Exception {
+		redisTemplate.execute(new RedisCallback<Object>() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				try {
+					byte[] _key=SpringRedisCache.this.getKey(key);
+					byte[] _fieldName=SpringRedisCache.this.getKey(fieldName);
+					return connection.hDel(_key,_fieldName);
 				} catch (Exception e) {
 					ExceptionLogger.writeLog(e, this.getClass());
 					return null;
@@ -124,6 +162,27 @@ public class SpringRedisCache implements ICache {
 		});
 
 	}
+	
+	
+	@Override
+	public void put(Serializable key, String fieldName, Object value) throws Exception {
+		redisTemplate.execute(new RedisCallback<Object>() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+				try {
+					byte[] _key = SpringRedisCache.this.getKey(key);
+					byte[] _fieldName = SpringRedisCache.this.getKey(fieldName);
+					byte[] _value = SpringRedisCache.this.object2Byte(value); 
+					connection.hSet(_key, _fieldName, _value);
+				} catch (Exception e) {
+					ExceptionLogger.writeLog(e, this.getClass());
+				}
+				return null;
+			}
+		});
+
+	}
 
 	@Override
 	public Object get(Serializable key, String fieldName) throws Exception {
@@ -134,11 +193,31 @@ public class SpringRedisCache implements ICache {
 				try {
 					byte[] _key = SpringRedisCache.this.getKey(key);
 					byte[] _fieldName = SpringRedisCache.this.getKey(fieldName);
-					byte[] value = connection.hGet(_key, _fieldName);
-					if (value == null || new String(value).equals("nil"))
-						return null;
-					else
-						return SpringRedisCache.this.byte2Object(value);
+					
+					
+					if(fieldName.contains(ICache.FILED_NAME_ALL)) {
+						//将Map<byte[],byte[]> 转换成Map<Object,Object>返回；
+						Map<byte[],byte[]> _value=connection.hGetAll(_key);
+						if(_value == null) {
+							return null;
+						}
+						Map<Object,Object> value=new HashMap<Object,Object>();
+						for(Map.Entry<byte[],byte[]> entry:_value.entrySet()) {
+							Object entrykey=new String(entry.getKey());
+							Object entryValue=SpringRedisCache.this.byte2Object(entry.getValue());
+							value.put(entrykey, entryValue);
+						}
+						return value;
+					}else {
+						byte[] value=connection.hGet(_key,_fieldName);
+						
+						if (value == null || new String(value).equals("nil")) {
+							return null;
+						}else {
+							return SpringRedisCache.this.byte2Object(value);
+						}
+					}
+					
 				} catch (Exception e) {
 					ExceptionLogger.writeLog(e, this.getClass());
 				}
@@ -146,7 +225,66 @@ public class SpringRedisCache implements ICache {
 			}
 		});
 	}
+	
+	/**
+	 * 消息订阅
+	 * @param chanelName 频道名称
+	 * @return
+	 */
+	public Object subscribe(BlockingQueue blockQueue, Serializable ... chanelName) {
+		try {
+			byte[][] chanelList=new byte[chanelName.length][];
+			for(int i=0;i<chanelName.length;i++) {
+				chanelList[i]=SpringRedisCache.this.getKey(chanelName[i]);
+			}
+			return redisTemplate.execute(new RedisCallback<Object>() {
+				@Override
+				public Object doInRedis(RedisConnection connection)throws DataAccessException {
+					connection.subscribe(new MessageListener() {
+						@Override
+						public void onMessage(Message message, byte[] pattern) {
+							try {
+								
+								byte[] _body=message.getBody();
+								Object body=SpringRedisCache.this.byte2Object(_body);
+								//加入队列；
+								blockQueue.put(body);
+							} catch (Exception e) {
+								ExceptionLogger.writeLog(e, this.getClass());
+							}
+						}
+					 }, chanelList);
+					return null;
+				}
+			});
+		} catch (Exception e) {
+			ExceptionLogger.writeLog(e, this.getClass());
+		}
+		return null;
+	}
 
+	/**
+	 * 消息发布
+	 * @param chanelName 频道名称
+	 * @param message 消息数据
+	 * @return
+	 */
+	public Object publish(Serializable chanelName,Object message) {
+		return redisTemplate.execute(new RedisCallback<Object>() {
+			@Override
+			public Object doInRedis(RedisConnection connection)
+					throws DataAccessException {
+					try {
+						byte[] _key=SpringRedisCache.this.getKey(chanelName);
+						byte[] _msg=SpringRedisCache.this.object2Byte(message);
+						return connection.publish(_key,_msg);
+					} catch (Exception e) {
+						ExceptionLogger.writeLog(e, this.getClass());
+					}
+					return null;
+			}	
+		});
+	}
 	/**
 	 * 将对象序列化成字节数组
 	 * 
@@ -172,11 +310,17 @@ public class SpringRedisCache implements ICache {
 	 * @throws Exception
 	 */
 	private Object byte2Object(byte[] value) throws Exception {
-		ByteArrayInputStream bi = new ByteArrayInputStream(value);
-		ObjectInputStream oi = new ObjectInputStream(bi);
-		Object result = oi.readObject();
-		bi.close();
-		oi.close();
+		
+		Object result=null;
+		try {
+			ByteArrayInputStream bi = new ByteArrayInputStream(value);
+			ObjectInputStream oi = new ObjectInputStream(bi);
+			result = oi.readObject();
+			bi.close();
+			oi.close();
+		} catch (StreamCorruptedException e) {
+			result=new String(value); 		
+		}
 		return result;
 	}
 
