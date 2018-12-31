@@ -2,6 +2,7 @@ package com.common.cache;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -312,14 +313,23 @@ public class SpringRedisCache implements ICache {
 	private Object byte2Object(byte[] value) throws Exception {
 		
 		Object result=null;
+		ByteArrayInputStream bi = null;
+		ObjectInputStream oi = null;
 		try {
-			ByteArrayInputStream bi = new ByteArrayInputStream(value);
-			ObjectInputStream oi = new ObjectInputStream(bi);
-			result = oi.readObject();
-			bi.close();
-			oi.close();
+			bi = new ByteArrayInputStream(value);
+			oi = new ObjectInputStream(bi);
+			result = oi.readObject();	
 		} catch (StreamCorruptedException e) {
 			result=new String(value); 		
+		}catch (EOFException e) {
+			result=new String(value); 		
+		}finally{
+			try {
+				bi.close();
+				oi.close();
+			} catch (Exception e) {
+				ExceptionLogger.writeLog(e,this.getClass());
+			}
 		}
 		return result;
 	}
