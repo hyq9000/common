@@ -328,7 +328,7 @@ public class SpringRedisCache implements ICache {
 				bi.close();
 				oi.close();
 			} catch (Exception e) {
-				ExceptionLogger.writeLog(e,this.getClass());
+				;
 			}
 		}
 		return result;
